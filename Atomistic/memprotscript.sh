@@ -44,7 +44,6 @@ fi
 ###### ADDED OPLS on 16/06/2015 ############
 ###### ADDED CHARMM 36 22/06/2015 ############
 ###### Added peptide capping stuff 08/03/2016 #############
-###### Added propka stuff 28/02/2017 #############
 
 if [[ "$forcefield" == "gromos" ]]
         then lipid=$gromoslipidonly	## Can change if using ff with different lipids
