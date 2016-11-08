@@ -38,13 +38,6 @@ if [[ "$1" == "-h" ]]; then echo "
 exit 0
 fi
 
-###### Change log 
-###### MODIFIED 24/11/2014 for new gmembed - including NUC in gmembed option###############
-###### MODIFIED 04/06/2015 for Gromos ff and new lipids ##################################
-###### ADDED OPLS on 16/06/2015 ############
-###### ADDED CHARMM 36 22/06/2015 ############
-###### Added peptide capping stuff 08/03/2016 #############
-
 if [[ "$forcefield" == "gromos" ]]
         then lipid=$gromoslipidonly	## Can change if using ff with different lipids
 fi
