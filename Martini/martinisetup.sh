@@ -14,7 +14,6 @@ cp /home/birac/Desktop/CoarseGrainSims/KIT/minimization.mdp .
 cp /home/birac/Desktop/CoarseGrainSims/KIT/equilibration_1.mdp .
 cp /home/birac/Desktop/CoarseGrainSims/KIT/equilibration_2.mdp .
 cp /home/birac/Desktop/CoarseGrainSims/KIT/cgmd_1000.mdp .
-#cp /home/birac/Desktop/CoarseGrainSims/KIT/waterbox.gro .
 cp /home/birac/Desktop/CoarseGrainSims/KIT/*itp .
 cp /home/birac/Desktop/CoarseGrainSims/KIT/insane_rc.py .
 
@@ -127,48 +126,10 @@ if [ ! -f $prot-mem.gro  ]; then
         exit 0
 fi
 
-<< 'END'
-# Update topology file
-
-sed -e '/ W   /d' $prot.top  -i
-sed -e '/NA   /d' $prot.top  -i
-sed -e '/CL   /d' $prot.top  -i
-
-
-solnum=`grep -c "W " $prot-mem.gro`
-nanum=`grep -c "NA+" $prot-mem.gro`
-clnum=`grep -c "CL-" $prot-mem.gro`
-
-echo -e '\n' >> $prot.top
-echo 'W   ' `echo $solnum` >> $prot.top
-echo 'NA+  ' `echo $nanum` >> $prot.top
-echo 'CL-  ' `echo $clnum` >> $prot.top
-
-END
-
-# To break up the colour!
-
 ## Section to generate new topology file
 
 echo -e '\n' >> $prot.top
 cat insanetop.txt >> $prot.top # Insanetop created by modified insane.py
-
-<< 'END'
-mv minimization-vacuum.gro minimization-vacuum_backup.gro
-
-grompp -f minimization-vacuum.mdp -p $prot.top -c $prot-mem.gro -o minimization-vacuum.tpr
-mdrun -deffnm minimization-vacuum -v
-
-
-if [ ! -f minimization-vacuum.gro ]; then
-        echo "
-        ###############################
-        Error in vacuum minimization !!
-        ###############################"
-        exit 0
-fi
-
-END
 
 # Make an appropriate index file to combine all lipids and solvents
 
@@ -186,8 +147,6 @@ if [[ -s ndx2 ]] ; then
                 sed '0,/'$i'/! s/'$i'/Dud/' index.ndx -i
         done < ndx2
 fi
-
-#echo q | make_ndx -f $prot-mem.gro -o index.ndx
 
 groups=`grep -c '\[' index.ndx`
 
