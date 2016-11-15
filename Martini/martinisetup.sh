@@ -24,6 +24,49 @@ cp /home/birac/Desktop/CoarseGrainSims/KIT/insane_rc.py .
 
 prot=$1
 
+if [ $# -eq 0 ]
+        then
+                echo "
+
+Please enter a name for your system"
+		echo "It must match the input pdb name"
+		echo "
+"
+		read vari
+                echo "You entered $vari"
+		prot=$vari
+fi
+
+echo "
+What should the main lipid be?
+
+"
+read lipid1
+echo "
+Do you want a second lipid?
+
+"
+	select yn in "Yes" "No"; do
+		case $yn in
+			Yes ) echo "What name?"; read lipid2; echo "What ratios? (Give one number on each line)"; read lipidratio1; read lipidratio2; break;;
+			No ) break ;;
+		esac
+	done
+
+
+## Reminders!
+
+<< 'END'
+echo "Are you ok with this membrane construct?" 
+	select yn in "Yes" "No"; do
+                case $yn in
+                        Yes ) break;;
+                        No ) exit 0;;
+                esac
+        done
+
+END
+
 #
 ## Firstly, make the CG protein
 ## Use -p to specify posres
