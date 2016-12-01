@@ -4,9 +4,6 @@ ARRAY=(SecY*E.pdb)
 ARRAYLEN=${#ARRAY[@]}
 ARRAY2=`echo ${ARRAYLEN} - 1 | bc`
 CURRENT_DIR=`pwd`
-GMX5=/usr/local/gromacs_5/bin
-
-## make sure gro file has edited details
 
 for i in `seq 0 ${ARRAY2}`; do
 	cd ${CURRENT_DIR}
