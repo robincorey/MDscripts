@@ -49,10 +49,7 @@ for j in `seq 0 ${ARRAYLEN}`; do
 rm linger_${ARRAY[j]}_${RES}.xvg
 echo linger > linger_${ARRAY[j]}_${RES}.xvg
 
-## :%s/${ARRAYG\[i\]}\./${ARRAYG\[i\]}_${ARRAY\[j\]}\./g
 for i in `seq 0 ${ARRAYALEN}`; do
-	#rm tempA.ndx
-	#echo -e "$A & r${ARRAYA[i]}"'\n'q | make_ndx -f $GRO -o tempA.ndx -n chains.ndx
 	if [[ ! -f tempA.ndx ]]; then
 		echo "#################
 		make_ndx failed!
@@ -69,51 +66,40 @@ for i in `seq 0 ${ARRAYALEN}`; do
                         #sed "/$delme/d" new.gro -i
                 fi
         done < SecA_${ARRAYA[i]}_${ARRAY[j]}.xvg
-	#num=`egrep -v "\#|\@" SecA_${ARRAYA[i]}_${ARRAY[j]}_${RES}.xvg | awk '{print $2}' | egrep "\-01" | egrep "^1|^2|^3|^4|^5|^6|^7"`
-	#echo $num >> linger_${ARRAY[j]}_${RES}.xvg
 done
 
 exit 0
 for i in `seq 0 ${ARRAYYLEN}`; do
-        #rm tempY.ndx
-	#echo -e "$B & r${ARRAYY[i]}"'\n'q | make_ndx -f $GRO -o tempY.ndx -n chains.ndx
         if [[ ! -f tempY.ndx ]]; then
                 echo "#################
                 make_ndx failed!
                 ##############"
                 exit 0
         fi
-	#echo -e $indices'\n'PO1_PO2_GL0 | g_mindist -f ${ARRAY[j]}.pbc.xtc -s $TPR -n tempY -od SecY_${ARRAYY[i]}_${ARRAY[j]}_${RES}.xvg -nice -5 -tu us
         echo SecY_${ARRAYY[i]} >> linger_${ARRAY[j]}_${RES}.xvg
         num=`egrep -v "\#|\@" SecY_${ARRAYY[i]}_${ARRAY[j]}_${RES}.xvg | awk '{print $2}' | egrep "\-01" | egrep "^1|^2|^3|^4|^5|^6|^7" | wc -l`
         echo $num >> linger_${ARRAY[j]}_${RES}.xvg
 done
 
 for i in `seq 0 ${ARRAYELEN}`; do
-        #rm tempE.ndx
-	#echo -e "$C & r${ARRAYE[i]}"'\n'q | make_ndx -f $GRO -o tempE.ndx -n chains.ndx
         if [[ ! -f tempE.ndx ]]; then
                 echo "#################
                 make_ndx failed!
                 ##############"
                 exit 0
         fi
-	#echo -e $indices'\n'PO1_PO2_GL0 | g_mindist -f ${ARRAY[j]}.pbc.xtc -s $TPR -n tempE -od SecE_${ARRAYE[i]}_${ARRAY[j]}_${RES}.xvg -nice -5 -tu us
         echo SecE_${ARRAYE[i]} >> linger_${ARRAY[j]}_${RES}.xvg
         num=`egrep -v "\#|\@" SecE_${ARRAYE[i]}_${ARRAY[j]}_${RES}.xvg | awk '{print $2}' | egrep "\-01" | egrep "^1|^2|^3|^4|^5|^6|^7" | wc -l`
 	echo $num >> linger_${ARRAY[j]}_${RES}.xvg
 done
 
 for i in `seq 0 ${ARRAYGLEN}`; do
-        #rm tempG.ndx
-	#echo -e "$D & r${ARRAYG[i]}"'\n'q | make_ndx -f $GRO -o tempG.ndx -n chains.ndx
         if [[ ! -f tempG.ndx ]]; then
                 echo "#################
                 make_ndx failed!
                 ##############"
                 exit 0
         fi
-	#echo -e $indices'\n'PO1_PO2 | g_mindist -f ${ARRAY[j]}.pbc.xtc -s $TPR -n tempG -od SecG_${ARRAYG[i]}_${ARRAY[j]}_${RES}.xvg -nice -5 -tu us
         echo SecG_${ARRAYG[i]} >> linger_${ARRAY[j]}_${RES}.xvg
         num=`egrep -v "\#|\@" SecG_${ARRAYG[i]}_${ARRAY[j]}_${RES}.xvg | awk '{print $2}' | egrep "\-01" | egrep "^1|^2|^3|^4|^5|^6|^7" | wc -l`
 	echo $num >> linger_${ARRAY[j]}_${RES}.xvg
