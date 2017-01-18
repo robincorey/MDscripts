@@ -1,9 +1,6 @@
 #!/home/birac/anaconda2/bin/python
 #
-# python script to plot any Gromacsdata file
-# 
 
-### Version control
 
 import scipy as sc
 import numpy as np
@@ -31,7 +28,6 @@ def loaddata ( str ):
 filename = sys.argv[1]
 jin = sys.argv[2]
 j = int(jin)
-#legend = sys.argv[3]
 xlabel = "time ($\mu$s)"
 ylabel = "residue to CL distance (nm)"
 xdata, ydata = np.loadtxt(fname='%s' % filename, delimiter=' ', usecols=(0,1), unpack=True)	
@@ -58,5 +54,4 @@ plt.title('%s' % filename )
 plt.ylim([0,5])
 plt.xlabel('%s' % xlabel, fontname="cmss10", fontsize=25 )
 plt.ylabel('%s' % ylabel, fontname="cmss10", fontsize=25 )
-#plt.legend()
 plt.savefig('%s.png' % filename, bbox_inches='tight')
