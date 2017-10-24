@@ -229,10 +229,11 @@ fi
 $GMX51 grompp -f equilibration_1_mem.mdp -c minimization.gro -p ${prot}.top -o equilibration_1.tpr -n memsol.ndx >& gp5
 $GMX51 mdrun -deffnm equilibration_1 -v >& md4  # Takes about 25 mins on 1 CPU 
 
-$GMX51 grompp -f equilibration_2_mem.mdp -c equilibration_1.gro -p ${prot}.top -o equilibration_2.tpr -n memsol.ndx >& gp6
+$GMX51 grompp -f equilibration_2_mem.mdp -c equilibration_1.gro -p ${prot}.top -o equilibration_2.tpr -n memsol.ndx -maxwarn 2 >& gp6
 $GMX51 mdrun -deffnm equilibration_2 -v >& md5  # Takes about 150 minutes on 1 CPU
 
-$GMX51 grompp -c equilibration_2.gro -f equilibration_3_mem.mdp -p ${prot}.top -o equilibration_3 >& gp7
+$GMX51 grompp -c equilibration_2.gro -f equilibration_3_mem.mdp -p ${prot}.top -o equilibration_3 -n memsol.ndx -maxwarn 2 >& gp7
+$GMX51 mdrun -deffnm equilibration_3 -v >& md6
 
 echo "
 
