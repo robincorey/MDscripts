@@ -64,7 +64,6 @@ memno=$(expr $groups + 0)
 solno=$(expr $groups + 1)
 lipid_ndxs=`for (( i=0; i<${#lipids[@]}; i++ )); do echo -n '"'${lipids[i]}'"' '|'; done`
 echo -e ${lipid_ndxs::-1} '\n' '"'W'"' '|' '"'ION'"' '\n' name $memno Mem '\n' name $solno Sol '\n'q  | make_ndx -f ${1} -o memsol.ndx -n index >& ndx3
-echo -e ${lipid_ndxs::-1} '\n' '"'W'"' '|' '"'ION'"' '\n' name $memno Mem '\n' name $solno Sol '\n'q
 }
 
 ReportError () {
@@ -102,6 +101,13 @@ if grep -q CL- ${1} ;
 fi
 }
 
+ChangeIons () {
+sed 's/NA+ /ION /g' ${1} -i
+sed 's/ NA+/  NA/g' ${1} -i
+sed 's/CL- /ION /g' ${1} -i
+sed 's/ CL/CL-/g' ${1} -i
+}
+
 rm -f vacuum_min.gro sol.gro ions.gro vacuum_min.tpr genion.tpr min_test.tpr index.ndx ${prot}-CG.pdb ${prot}.top ${prot}-posres.itp minimization.tpr equilibration_1.tpr equilibration_2.tpr insanetop.txt rebuild_*.gro
 
 pdb2gmx -f ${prot}.pdb -ignh -q ${prot}_clean.pdb -ff oplsaa -water spc >& pdbout
@@ -116,7 +122,7 @@ ReportError ${prot}-CG.pdb
 
 sed -i -e "1,2d" ${prot}.top
 sed '1i #include "martini_v2.0_ions.itp"' ${prot}.top -i
-sed '1i #include "martini_v2.0_lipids_rcorey.itp"' ${prot}.top -i
+sed '1i #include "martini_v2.0_lipids_all_201506.itp"' ${prot}.top -i
 sed '1i #include "martini_v2.2_aminoacids.itp"' ${prot}.top -i
 sed '1i #include "martini_v2.2.itp"' ${prot}.top -i
 
@@ -134,15 +140,15 @@ for (( i=0; i<${#lipids[@]}; i++ )); do
 	number=`echo "scale=4; ${lipidratios[i]} / ${totallipid} * $lipidnumber" | bc | cut -f1 -d'.'`
 	j=`echo "${i} + 1" | bc`
 	gmx insert-molecules -f ${i}.gro -ci ${lipids[i]}_single.gro -nmol $number -try 500 -o ${j}.gro >& box_${i}
-	cp ${i}.gro box.gro
+	cp ${j}.gro box.gro
 done
 
 ReportError box.gro
 UpdateToplogy box.gro
 RebuildGro box.gro
 
-z=`echo "$z + 6" | bc`
-gmx solvate -cp rebuild_box.gro -cs water.gro -o sol.gro -p -box $x $y $z2 >& sol -vdwd 0.21
+z2=`echo "$z + 4" | bc`
+gmx solvate -cp rebuild_box.gro -cs water.gro -o sol.gro -p -box $x $y $z2 >& sol 
 
 ReportError sol.gro
 UpdateToplogy sol.gro
@@ -152,10 +158,12 @@ RebuildGro sol.gro
 grompp -f minimization.mdp -p ${prot}.top -c rebuild_sol.gro -o genion.tpr -n memsol >& g2
 echo W | genion -s genion.tpr -pname NA+ -nname CL- -neutral -o ions.gro >& ions
 
-ReportError rebuilt_ions.gro
+ReportError ions.gro
 UpdateToplogy ions.gro
 MakeNdx ions.gro
 RebuildGro ions.gro
+
+ChangeIons rebuild_ions.gro
 
 grompp -f minimization.mdp -c rebuild_ions.gro -p ${prot}.top -o minimization.tpr -n memsol.ndx >& gp4
 mdrun -deffnm minimization -v >& md3
