@@ -132,7 +132,8 @@ cp ${prot}-CG.box.gro 0.gro
 
 for (( i=0; i<${#lipids[@]}; i++ )); do
 	number=`echo "scale=4; ${lipidratios[i]} / ${totallipid} * $lipidnumber" | bc | cut -f1 -d'.'`
-	gmx insert-molecules -f ${i}.gro -ci ${lipid[i]}_single.gro -nmol $number -try 500 -o ${i}.gro -vdwd 0.21 >& box_${i}
+	j=`echo "${i} + 1" | bc`
+	gmx insert-molecules -f ${i}.gro -ci ${lipids[i]}_single.gro -nmol $number -try 500 -o ${j}.gro >& box_${i}
 	cp ${i}.gro box.gro
 done
 
