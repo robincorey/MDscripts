@@ -8,7 +8,7 @@ lipidratios=(4 10 2)
 run=yes
 CD=`pwd`
 
-rm -f vacuum_min.gro PE.gro PECL.gro sol.gro ions.gro vacuum_min.tpr genion.tpr min_test.tpr
+rm -f vacuum_min.gro *tpr sol.gro ions.gro box.gro
 
 prot=${prot1//.pdb}
 
@@ -80,18 +80,21 @@ for (( i=0; i<${#lipids[@]}; i++ )); do
         lipidnum=`tail -n +2 ${1} | grep ${lipids[i]} | awk '{print $1}' | sort -u | wc -l`
         echo "${lipids[i]} $lipidnum" >> ${prot}.top
 done
+sed "/^W /d" ${prot}.top -i
 if grep -q W ${1} ;
-        then sed "/^W/d" ${prot}.top -i
+        then
         solnum=`tail -n +2 ${1}| grep -c "W "`
         echo "W $solnum" >> ${prot}.top
 fi
+sed "/^NA /d" ${prot}.top -i
 if grep -q NA ${1} ;
-        then sed "/^NA/d" ${prot}.top -i
+        then
         NAnum=`tail -n +2 ${1} | grep -c "NA"`
         echo "NA $NAnum" >> ${prot}.top
 fi
+sed "/^CL- /d" ${prot}.top -i
 if grep -q CL- ${1} ;
-        then sed "/^CL-/d" ${prot}.top -i
+        then
         CLnum=`tail -n +2 ${1} | grep -c "CL-"`
         echo "CL- $CLnum" >> ${prot}.top
 fi
@@ -106,13 +109,18 @@ sed 's/ CL/CL-/g' ${1} -i
 
 rm -f vacuum_min.gro sol.gro ions.gro vacuum_min.tpr genion.tpr min_test.tpr index.ndx ${prot}-CG.pdb ${prot}.top ${prot}-posres.itp minimization.tpr equilibration_1.tpr equilibration_2.tpr insanetop.txt rebuild_*.gro
 
-gmx_sse pdb2gmx -f ${prot}.pdb -ignh -q ${prot}_clean.pdb -ff oplsaa -water spc >& dbout
+cp ${prot}.pdb ${prot}_ter.pdb
+
+sed '/ OXT /a TER' ${prot}_ter.pdb -i
+sed '/ O2 /a TER' ${prot}_ter.pdb -i
+
+gmx_sse pdb2gmx -f ${prot}_ter.pdb -ignh -q ${prot}_clean.pdb -ff oplsaa -water spc -chainsep ter >& pdbout
 
 ReportError "${prot}_clean.pdb"
 
 /sansom/s137/bioc1535/Downloads/memembed-1.15/bin/memembed -o ${prot}_mem.pdb  ${prot}_clean.pdb >& mem
 
-python martinize.py -f ${prot}_mem.pdb -o ${prot}.top -p ${prot}-posres.itp -x ${prot}-CG.pdb -dssp /sansom/s137/bioc1535/dssp/mkdssp -p backbone -ff elnedyn22 >& one
+python martinize.py -f ${prot}_mem.pdb -o ${prot}.top -p ${prot}-posres.itp -x ${prot}-CG.pdb -dssp /sansom/s137/bioc1535/dssp/mkdssp -p backbone -ff martini22 -elastic -ef 500 -el 0.5 -eu 0.9 -ea 0 -ep 0 >& one
 
 ReportError ${prot}-CG.pdb
 
@@ -129,16 +137,18 @@ gmx_sse editconf -f ${prot}-CG.pdb -o ${prot}-CG.box.gro -bt triclinic -d 2 >&  
 x=`tail -n 1 ${prot}-CG.box.gro | awk {'print $1'}`
 y=`tail -n 1 ${prot}-CG.box.gro | awk {'print $2'}`
 z=`tail -n 1 ${prot}-CG.box.gro | awk {'print $3'}`
-area=`echo "scale=4; $x * $y * 2" | bc`
-lipidnumber=`echo "scale=4; $area / 0.7" | bc` # where 0.7 is ~APL
+area=`echo "scale=4; $x * $y * 3.5" | bc`
+lipidnumber=`echo "scale=4; $area" | bc`
+echo "will add $lipidnumber lipids"
+
+gmx_sse editconf -f ${prot}-CG.box.gro -o ${prot}-CG.box2.gro -box $x $y 8 >& edc2
 
 tot=0
 for (( i=0; i<${#lipidratios[@]}; i++ )); do
   let totallipid+=${lipidratios[i]}
 done
-echo totallipid is $totallipid
 
-cp ${prot}-CG.box.gro 0.gro
+cp ${prot}-CG.box2.gro 0.gro
 
 for (( i=0; i<${#lipids[@]}; i++ )); do
 	number=`echo "scale=4; ${lipidratios[i]} / ${totallipid} * $lipidnumber" | bc | cut -f1 -d'.'`
@@ -152,8 +162,7 @@ ReportError box.gro
 UpdateToplogy box.gro
 RebuildGro box.gro
 
-z2=`echo "$z + 2" | bc`
-gmx_sse solvate -cp rebuild_box.gro -cs water.gro -o sol.gro -p -box $x $y $z2 >& sol 
+gmx_sse solvate -cp rebuild_box.gro -cs water.gro -o sol.gro -p -box $x $y $z >& sol 
 
 ReportError sol.gro
 UpdateToplogy sol.gro
@@ -170,15 +179,19 @@ RebuildGro ions.gro
 
 ChangeIons rebuild_ions.gro
 
+echo starting minimization
 gmx_sse grompp -f minimization.mdp -c rebuild_ions.gro -p ${prot}.top -o minimization.tpr -n memsol.ndx >& gp4
 gmx_sse mdrun -deffnm minimization -v >& md3
 
-gmx_sse grompp -f equilibration_1_mem.mdp -c minimization.gro -p ${prot}.top -o equilibration_1.tpr -n memsol.ndx >& gp5
+echo starting equilibration
+gmx_sse grompp -f equilibration_1_mem.mdp -c minimization.gro -p ${prot}.top -o equilibration_1.tpr -n memsol.ndx -maxwarn 2 >& gp5
 gmx_sse mdrun -deffnm equilibration_1 -v >& md4  # Takes about 25 mins on 1 CPU 
 
+echo starting equilibration 2
 gmx_sse grompp -f equilibration_2_mem.mdp -c equilibration_1.gro -p ${prot}.top -o equilibration_2.tpr -n memsol.ndx -maxwarn 2 >& gp6
 gmx_sse mdrun -deffnm equilibration_2 -v >& md5  # Takes about 150 minutes on 1 CPU
 
+echo dynamic
 gmx_sse grompp -c equilibration_2.gro -f dynamic_mem.mdp -p ${prot}.top -o dynamic -n memsol.ndx -maxwarn 2 >& gp7
 gmx_sse mdrun -deffnm dynamic -v >& md6
 
