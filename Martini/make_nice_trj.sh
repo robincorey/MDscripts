@@ -10,5 +10,6 @@ XTC2=${XTC%.*}
 #echo trj2 done
 #rm -f ${XTC2}.1.xtc
 
-echo -e Protein '\n' System | gmx_sse trjconv -f ${XTC} -s ${TPR} -o ${XTC2}.pbc.xtc -center -pbc res -nice -5 -skip 500
+echo -e Protein '\n' System | gmx_sse trjconv -f ${XTC} -s ${TPR} -o ${XTC2}.pbc.xtc -center -pbc res -nice -5 -skip 10 
+echo -e Protein '\n' System | gmx_sse trjconv -f ${XTC2}.pbc.xtc -s ${TPR} -o ${XTC2}.pbc.fit.xtc  -fit rotxy+transxy
 

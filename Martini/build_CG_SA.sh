@@ -86,13 +86,13 @@ if grep -q W ${1} ;
         solnum=`tail -n +2 ${1}| grep -c "W "`
         echo "W $solnum" >> ${prot}.top
 fi
-sed "/^NA /d" ${prot}.top -i
+sed "/^NA/d" ${prot}.top -i
 if grep -q NA ${1} ;
         then
         NAnum=`tail -n +2 ${1} | grep -c "NA"`
         echo "NA $NAnum" >> ${prot}.top
 fi
-sed "/^CL- /d" ${prot}.top -i
+sed "/^CL/d" ${prot}.top -i
 if grep -q CL- ${1} ;
         then
         CLnum=`tail -n +2 ${1} | grep -c "CL-"`
