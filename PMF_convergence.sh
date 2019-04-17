@@ -11,6 +11,5 @@ do
 	fi
 done
 
-#cd convergence
-#$CG/PLOT_PMF_equil.py > equil_data.txt
-#$CG/PLOT_equil_timecourse.py 
+$CG/PLOT_PMF_equil.py > equil_data.txt
+$CG/PLOT_equil_timecourse.py 
