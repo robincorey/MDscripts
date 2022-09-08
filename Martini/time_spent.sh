@@ -2,9 +2,12 @@
 # Script to measure dist between key residues and CL head groups
 # Can be used for every sim
 
+# this array needs to match the name of the inout files
 ARRAY=(192.small 192_reseed.1.small 192_reseed.2.small 192_reseed.3.small 192_reseed.4.small unbiased_BC3)
 ARRAYLEN=`echo ${#ARRAY[@]} - 1 | bc`
 CURRENTDIR=`pwd`
+
+# these files need to exist
 TPR=unbiased.tpr
 GRO=minimization.gro
 RES=$1
