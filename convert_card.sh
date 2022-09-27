@@ -1,6 +1,8 @@
 #!/bin/bash
 
 GRO=$1
+#  script to convert CARD from one file format another
+#  highly format specific
 
 if [ -z $GRO ]; then echo no gro; exit 0; fi
 
