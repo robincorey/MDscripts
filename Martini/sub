@@ -1,7 +1,0 @@
-#!/bin/bash 
-#$ -N MD
-#$ -pe mpi 16 -cwd -V
-#$ -q gpu-sansom,gpu-sansom2
-
-module load apps/gromacs/5.1.2 mpi/openmpi
-mpirun -np 4 gmx_mpi mdrun -v -deffnm pr -ntomp 4
